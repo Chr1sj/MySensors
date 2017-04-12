@@ -103,7 +103,7 @@ void loop()
 	unsigned long currentTime = millis();
 
 	// Only send values at a maximum frequency or woken up from sleep
-	if (SLEEP_MODE || (currentTime - lastSend > SEND_FREQUENCY)) {
+	if (currentTime - lastSend > SEND_FREQUENCY) {
 		lastSend=currentTime;
 
 		if (!pcReceived) {
@@ -112,26 +112,8 @@ void loop()
 			return;
 		}
 
-		if (!SLEEP_MODE && flow != oldflow) {
-			oldflow = flow;
-
-			Serial.print("l/min:");
-			Serial.println(flow);
-
-			// Check that we dont get unresonable large flow value.
-			// could hapen when long wraps or false interrupt triggered
-			if (flow<((unsigned long)MAX_FLOW)) {
-				send(flowMsg.set(flow, 2));                   // Send flow value to gw
-			}
-		}
-
-		// No Pulse count received in 2min
-		if(currentTime - lastPulse > 120000) {
-			flow = 0;
-		}
-
 		// Pulse count has changed
-		if ((pulseCount != oldPulseCount)||(!SLEEP_MODE)) {
+		if (pulseCount != oldPulseCount) {
 			oldPulseCount = pulseCount;
 
 			Serial.print("pulsecount:");
@@ -140,7 +122,7 @@ void loop()
 			send(lastCounterMsg.set(pulseCount));                  // Send  pulsecount value to gw in VAR1
 
 			double volume = ((double)pulseCount/((double)PULSE_FACTOR));
-			if ((volume != oldvolume)||(!SLEEP_MODE)) {
+			if (volume != oldvolume) {
 				oldvolume = volume;
 
 				Serial.print("volume:");
@@ -150,17 +132,13 @@ void loop()
 			}
 		}
 	}
-	if (SLEEP_MODE) {
-		sleep(SEND_FREQUENCY);
-	}
 }
 
-void receive(const MyMessage &message)
+void receive(const MyMessage &message) //Haal 1 keer de waarden op van gateway
 {
 	if (message.type==V_VAR1) {
 		unsigned long gwPulseCount=message.getULong();
-		pulseCount += gwPulseCount;
-		flow=oldflow=0;
+		pulseCount += gwPulseCount; //pulseCount = 162516
 		Serial.print("Received last pulse count from gw:");
 		Serial.println(pulseCount);
 		pcReceived = true;
@@ -170,19 +148,5 @@ void receive(const MyMessage &message)
 void onPulse()
 {
 	Serial.print("PulsGezien");
-	if (!SLEEP_MODE) {
-		unsigned long newBlink = micros();
-		unsigned long interval = newBlink-lastBlink;
-
-		if (interval!=0) {
-			lastPulse = millis();
-			if (interval<500000L) {
-				// Sometimes we get interrupt on RISING,  500000 = 0.5sek debounce ( max 120 l/min)
-				return;
-			}
-			flow = (60000000.0 /interval) / ppl;
-		}
-		lastBlink = newBlink;
-	}
 	pulseCount++;
 }
