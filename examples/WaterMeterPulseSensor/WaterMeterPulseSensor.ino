@@ -86,7 +86,7 @@ void setup()
 
 	lastSend = lastPulse = millis();
 
-	attachInterrupt(digitalPinToInterrupt(DIGITAL_INPUT_SENSOR), onPulse, FALLING);
+	attachInterrupt(digitalPinToInterrupt(DIGITAL_INPUT_SENSOR), onPulse, RISING);
 }
 
 void presentation()
