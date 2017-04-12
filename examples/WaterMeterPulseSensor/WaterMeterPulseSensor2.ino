@@ -149,4 +149,6 @@ void onPulse()
 {
 	Serial.print("PulsGezien");
 	pulseCount++;
+	Serial.print("Nieuwe pulsecount:");
+	Serial.println(pulseCount);
 }
