@@ -54,7 +54,7 @@
 #define CHILD_ID 1                              // Id of the sensor child
 
 unsigned long SEND_FREQUENCY =
-    30000;           // Minimum time between send (in milliseconds). We don't want to spam the gateway.
+    5000;           // Minimum time between send (in milliseconds). We don't want to spam the gateway (30000 ms = 30s).
 
 MyMessage flowMsg(CHILD_ID,V_FLOW);
 MyMessage volumeMsg(CHILD_ID,V_VOLUME);
