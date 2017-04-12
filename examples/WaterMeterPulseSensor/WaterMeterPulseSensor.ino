@@ -169,6 +169,7 @@ void receive(const MyMessage &message)
 
 void onPulse()
 {
+	Serial.print("PulsGezien")
 	if (!SLEEP_MODE) {
 		unsigned long newBlink = micros();
 		unsigned long interval = newBlink-lastBlink;
